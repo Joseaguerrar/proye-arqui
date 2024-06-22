@@ -86,8 +86,8 @@ actualizarSerpiente:
 
     addiu $sp, $sp, -24 #Pedimos 24 bytes en la pila
     sw $fp, 0($sp)     #Almacenamos el framepointer
-    sw $ra, 4($sp)     #
-    addiu $fp, $sp,20 
+    sw $ra, 4($sp)     #Almacenar el $ra
+    addiu $fp, $sp,20   #Settear el frame pointer de actualizarSerpiente
 
 
     #cabeza
