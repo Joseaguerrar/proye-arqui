@@ -4,6 +4,8 @@ appleX:		.word	20 #Dirección X de la manzana
 appleY:		.word	13 #Dirección Y de la manzana		
 xConversion:	.word	64 #Conversión X Fila=64		
 yConversion:	.word	4 #Conversión Y cada uno tiene 4	
+posiX:  .word 50 #es una dirección arbitraria
+posiY:  .word 27 #es una dirección arbitraria
 
 
 .text
@@ -56,6 +58,51 @@ pintarBordeDere:
     addi $t0, $t0,256 #Nos movemos al último pixel de la primera fila
     addi $t1,$t1,-1#Restamos 1
     bnez $t1,pintarBordeDere #Si es 0 paramos, si no vuelve a hacerlo
+
+jal dibujarManzana
+
+actualizarJuego:
+    lw $t3 , 0xffff0004 #Guarda las entradas de teclado en $t3
+
+    addi $v0, $zero,32 #Damos un tiempo entre interacción
+    addi $a0,$zero, 55 # 55 ms
+    syscall
+
+    beq $t3, 119, arriba #Entrada de teclado w
+    beq $t3, 115, abajo #Entrada de teclado s
+    beq $t3, 97, izquierda #Entrada de teclado a
+    beq $t3, 100, derecha #Entrada de teclado d
+    beq $t3, 0, arriba #empezar juego hacia arriba
+
+
+###$sp + 0:  [guardado $fp]###
+###$sp + 4:  [guardado $ra]###
+###$sp + 8:  [espacio para variables locales o argumentos]###
+###$sp + 12: [espacio para variables locales o argumentos]###
+###$sp + 16: [espacio para variables locales o argumentos]###
+###$sp + 20: [nuevo $fp]###
+
+actualizarSerpiente:
+
+    addiu $sp, $sp, -24 #Pedimos 24 bytes en la pila
+    sw $fp, 0($sp)     #Almacenamos el framepointer
+    sw $ra, 4($sp)     #
+    addiu $fp, $sp,20 
+
+
+    #cabeza
+    lw $t0, posiX   #posiX de la serpiente
+    lw $t1, posiY   #posiY de la serpiente
+    lw $t2, xConversion  #conversion para los cálculosX(64)
+    mult $t1, $t2       #PosicionY * 64
+    mflo $t3    #Guardarlo en $t3
+    add $t3, $t3, $t0 #Sumarle la posición en X
+    lw $t2, yConversion #conversion para los cálculos en Y(4)
+    mult, $t3, $t2  #Direccion calculada en $t3 por la conversión en Y
+    mflo $t0    #Guardar el resultado en $t0
+
+    #Velocidad para todas direcciones
+    #TODO
 
 dibujarManzana:
 	addiu 	$sp, $sp, -24	# Reserva 24 bytes en la pila	
